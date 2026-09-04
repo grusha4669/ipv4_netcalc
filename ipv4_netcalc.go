@@ -1,3 +1,9 @@
+// Copyright (C) 2026 grusha4669
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License.
+
 package main
 
 import (
