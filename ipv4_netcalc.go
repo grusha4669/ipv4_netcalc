@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Вспомогательная функция для форматирования в HEX (A.B.C.D -> AA.BB.CC.DD)
+// Helper function for HEX formatting (A.B.C.D -> AA.BB.CC.DD)
 func toHex(ip net.IP) string {
 	ipv4 := ip.To4()
 	if ipv4 == nil {
@@ -20,7 +20,7 @@ func toHex(ip net.IP) string {
 	return fmt.Sprintf("%02X.%02X.%02X.%02X", ipv4[0], ipv4[1], ipv4[2], ipv4[3])
 }
 
-// Вспомогательная функция для форматирования числа хостов с разделителями-запятыми (1073741822 -> 1,073,741,822)
+// Helper function to format the host count with comma separators (1073741822 -> 1,073,741,822)
 func formatHosts(n uint32) string {
 	in := fmt.Sprintf("%d", n)
 	numOfDigits := len(in)
@@ -44,7 +44,7 @@ func formatHosts(n uint32) string {
 	return result.String()
 }
 
-// Вспомогательная функция для бинарного вида (в точности как на скриншоте)
+// Helper function for binary view (exactly as in the screenshot)
 func toBin(ip net.IP, maskOnes int) string {
 	ipv4 := ip.To4()
 	if ipv4 == nil {
@@ -67,14 +67,19 @@ func toBin(ip net.IP, maskOnes int) string {
 	}
 
 	insertPos := maskOnes + dotOffset
+
+	if rawBin[insertPos] == '.' {
+		// Replace the dot with the " | " separator, skipping the dot itself (insertPos+1)
+		return rawBin[:insertPos] + " | " + rawBin[insertPos+1:]
+	}
 	return rawBin[:insertPos] + " | " + rawBin[insertPos:]
 }
 
-// Выполняет расчет и красиво печатает таблицу параметров сети
+// Performs calculation and beautifully prints the network parameters table
 func calculateAndPrint(input string) bool {
 	ip, ipNet, err := net.ParseCIDR(input)
 	if err != nil || ip.To4() == nil || !strings.Contains(input, "/") {
-		fmt.Println("Ошибка: неверный формат. Используйте только вид A.B.C.D/M (IPv4)")
+		fmt.Println("Error: invalid format. Use only A.B.C.D/M format (IPv4)")
 		return false
 	}
 
@@ -113,8 +118,8 @@ func calculateAndPrint(input string) bool {
 	}
 
 	fmt.Println()
-	fmt.Printf("%-12s %-16s %-15s %s\n", "Имя", "Значение", "16-ричный код", "Бинарное значение")
-	fmt.Printf("%-12s %-16s %-15s %s\n", "Адрес", ip.String(), toHex(ip), toBin(ip, ones))
+	fmt.Printf("%-12s %-16s %-15s %s\n", "Name", "Value", "Hex Code", "Binary Value")
+	fmt.Printf("%-12s %-16s %-15s %s\n", "Address", ip.String(), toHex(ip), toBin(ip, ones))
 	fmt.Printf("%-12s %-16s %-15s %s\n", "Bitmask", fmt.Sprintf("%d", ones), "", "")
 	fmt.Printf("%-12s %-16s %-15s %s\n", "Netmask", maskIP.String(), toHex(maskIP), toBin(maskIP, ones))
 	fmt.Printf("%-12s %-16s %-15s %s\n", "Wildcard", wildcardIP.String(), toHex(wildcardIP), toBin(wildcardIP, ones))
@@ -126,7 +131,7 @@ func calculateAndPrint(input string) bool {
 	fmt.Println()
 
 	if ones == 31 {
-		fmt.Println("Согласно RFC 3021")
+		fmt.Println("According to RFC 3021")
 		fmt.Println()
 	}
 
@@ -134,35 +139,35 @@ func calculateAndPrint(input string) bool {
 }
 
 func main() {
-	// Кастомизируем текст встроенной справки -h / --help
+	// Customizing the built-in help text for -h / --help
 	flag.Usage = func() {
-		// filepath.Base("путь/к/файлу") вернет просто имя файла
+		// filepath.Base("path/to/file") will return just the file name
 		exeName := filepath.Base(os.Args[0])
-		fmt.Printf("Использование: %s [-c IP/Маска]\n\n", exeName)
-		fmt.Println("Флаги:")
+		fmt.Printf("Usage: %s [-c IP/Mask]\n\n", exeName)
+		fmt.Println("Flags:")
 		flag.PrintDefaults()
 	}
 
-	// Объявляем флаг -c
-	cidrFlag := flag.String("c", "", "CIDR сеть для расчета (например, 192.168.0.1/16)")
+	// Declare the -c flag
+	cidrFlag := flag.String("c", "", "CIDR network for calculation (e.g., 192.168.0.1/16)")
 	flag.Parse()
 
-	// 1. Если передан флаг -c
+	// 1. If the -c flag is passed
 	if *cidrFlag != "" {
 		calculateAndPrint(strings.TrimSpace(*cidrFlag))
 		return
 	}
 
-	// 2. Если аргументы переданы без флага (для обратной совместимости, например: go run main.go 1.1.1.1/31)
+	// 2. If arguments are passed without a flag (for backward compatibility, e.g., go run main.go 1.1.1.1/31)
 	if flag.NArg() > 0 {
 		calculateAndPrint(strings.TrimSpace(flag.Arg(0)))
 		return
 	}
 
-	// 3. Если запустили вообще без параметров — включаем интерактивный режим
+	// 3. If run with no parameters at all — enable interactive mode
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
-		fmt.Print("Введите IP/Маску (например, 192.168.0.1/16): ")
+		fmt.Print("Enter IP/Mask (e.g., 192.168.0.1/16): ")
 		if !scanner.Scan() {
 			break
 		}
