@@ -138,6 +138,11 @@ func calculateAndPrint(input string) bool {
 	return true
 }
 
+func waitExit() {
+	fmt.Println("Press [Enter] to exit...")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
+}
+
 func main() {
 	// Customizing the built-in help text for -h / --help
 	flag.Usage = func() {
@@ -183,4 +188,5 @@ func main() {
 			break
 		}
 	}
+	waitExit()
 }
