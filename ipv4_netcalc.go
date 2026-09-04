@@ -136,6 +136,7 @@ func calculateAndPrint(input string) bool {
 func main() {
 	// Кастомизируем текст встроенной справки -h / --help
 	flag.Usage = func() {
+		// filepath.Base("путь/к/файлу") вернет просто имя файла
 		exeName := filepath.Base(os.Args[0])
 		fmt.Printf("Использование: %s [-c IP/Маска]\n\n", exeName)
 		fmt.Println("Флаги:")
